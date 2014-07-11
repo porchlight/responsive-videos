@@ -1,0 +1,9 @@
+name = Responsive Videos
+description = Make all videos responsive, maybe?
+core = 7.x
+package = Echidna Custom
+
+dependencies[] = media
+dependencies[] = ckeditor
+
+files[] = css/responsive_videos.css

@@ -1,0 +1,167 @@
+<?php
+
+/**
+ * @file
+ * responsive_videos.module
+ */
+
+/**
+ * Implements hook_field_info().
+ *
+ * Provides the description of the field.
+ */
+function responsive_videos_field_info() {
+  return array(
+    // We name our field as the associative name of the array.
+    'responsive_videos_embed' => array(
+      'label' => t('Video Embed'),
+      'description' => t('Video embed code.'),
+      'default_widget' => 'responsive_videos_iframe',
+      'default_formatter' => 'responsive_videos_wrapper',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_validate().
+ *
+ */
+function responsive_videos_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  foreach ($items as $delta => $item) {
+    if (!empty($item['embed'])) {
+      if (!preg_match('#(?:<iframe[^>]*)(?:(?:/>)|(?:>.*?</iframe>))#i', $item['embed'])) {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'responsive_videos_invalid',
+          'message' => t('Please make sure your embed code is properly formatted.'),
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_is_empty().
+ *
+ */
+function responsive_videos_field_is_empty($item, $field) {
+  return empty($item['embed']);
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ *
+ */
+function responsive_videos_field_formatter_info() {
+  return array(
+    // This formatter just displays the hex value in the color indicated.
+    'responsive_videos_wrapper' => array(
+      'label' => t('Responsive'),
+      'field types' => array('responsive_videos_embed'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ *
+ */
+function responsive_videos_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  switch ($display['type']) {
+    case 'responsive_videos_wrapper':
+      $path = drupal_get_path('module', 'responsive_videos');
+      drupal_add_css($path . 'css/responsive_videos.css');
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array(
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#attributes' => array(
+            'class' => 'video-container',
+          ),
+          '#value' => $item['embed'],
+        );
+      }
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_widget_info().
+ *
+ */
+function responsive_videos_field_widget_info() {
+  return array(
+    'responsive_videos_iframe' => array(
+      'label' => t('iframe'),
+      'field types' => array('responsive_videos_embed'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function responsive_videos_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $value = isset($items[$delta]['embed']) ? $items[$delta]['embed'] : '';
+
+  $widget = $element;
+  $widget['#delta'] = $delta;
+
+  switch ($instance['widget']['type']) {
+
+    case 'responsive_videos_iframe':
+      $widget += array(
+        '#type' => 'textfield',
+        '#default_value' => $value,
+        '#size' => 60,
+      );
+      break;
+
+  }
+
+  $element['embed'] = $widget;
+  return $element;
+}
+
+/**
+ * Implements hook_field_widget_error().
+ *
+ */
+function responsive_videos_field_widget_error($element, $error, $form, &$form_state) {
+  switch ($error['error']) {
+    case 'responsive_videos_invalid':
+      form_error($element, $error['message']);
+      break;
+  }
+}
+
+/**
+ * Implements template_preprocess_field().
+ *
+ */
+function responsive_videos_preprocess_field(&$variables, $hook) {
+  $video = FALSE;
+  if ($variables['element']['#field_name'] == 'body') {
+    $markup = $variables['items']['0']['#markup'];
+    $pattern = '#(?:<iframe[^>]*)(?:(?:/>)|(?:>.*?</iframe>))#i';
+    preg_match_all($pattern, $markup, $output);
+    if (isset($output[0][0])) {
+      $replace = '<div class="video-container">' . $output[0][0] . '</div>';
+      $variables['items']['0']['#markup'] = str_replace($output[0][0], $replace, $markup);
+      $video = TRUE;
+    }
+  }
+  if ($variables['element']['#field_name'] == 'field_video') {
+    $video = TRUE;
+  }
+  if ($video) {
+    $variables['element']['#attached']['css'][] = array(
+      'data' =>  drupal_get_path('module', 'responsive_videos') . '/css/responsive_videos.css',
+      'type' => 'file'
+    );
+    dpm($variables);
+  }
+}
