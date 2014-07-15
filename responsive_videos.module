@@ -145,7 +145,6 @@ function responsive_videos_preprocess_field(&$variables, $hook) {
     $pattern = '#(?:<iframe[^>]*)(?:(?:/>)|(?:>.*?</iframe>))#i';
     if (isset($variables['items']['0']['#markup'])) {
       if (preg_match_all($pattern, $variables['items']['0']['#markup'], $output)) {
-        dpm($variables);
         foreach ($output[0] as $embed) {
           $variables['items']['0']['#markup'] = str_replace($embed, '<div class="video-container">' . $embed . '</div>', $variables['items']['0']['#markup']);
         }
