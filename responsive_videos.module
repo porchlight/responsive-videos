@@ -8,11 +8,9 @@
 /**
  * Implements hook_field_info().
  *
- * Provides the description of the field.
  */
 function responsive_videos_field_info() {
   return array(
-    // We name our field as the associative name of the array.
     'responsive_videos_embed' => array(
       'label' => t('Video Embed'),
       'description' => t('Video embed code.'),
@@ -53,7 +51,6 @@ function responsive_videos_field_is_empty($item, $field) {
  */
 function responsive_videos_field_formatter_info() {
   return array(
-    // This formatter just displays the hex value in the color indicated.
     'responsive_videos_wrapper' => array(
       'label' => t('Responsive'),
       'field types' => array('responsive_videos_embed'),
