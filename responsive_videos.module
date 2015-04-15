@@ -95,7 +95,7 @@ function responsive_videos_field_formatter_view($entity_type, $entity, $field, $
 function responsive_videos_field_widget_info() {
   return array(
     'responsive_videos_iframe' => array(
-      'label' => t('iframe'),
+      'label' => t('iFrame'),
       'field types' => array('responsive_videos_embed'),
     ),
   );
@@ -113,10 +113,12 @@ function responsive_videos_field_widget_form(&$form, &$form_state, $field, $inst
   switch ($instance['widget']['type']) {
     case 'responsive_videos_iframe':
       $widget += array(
-        '#type' => 'textfield',
+        '#type' => 'textarea',
         '#default_value' => $value,
-        '#size' => 60,
+        '#rows' => 3,
       );
+
+      $widget['#description'] = t('Paste in the complete iFrame embed code from YouTube or Vimeo');
       break;
   }
 
