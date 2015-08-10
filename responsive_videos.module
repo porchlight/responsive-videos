@@ -148,6 +148,10 @@ function responsive_videos_preprocess_field(&$variables, $hook) {
     if (isset($variables['items']['0']['#markup'])) {
       if (preg_match_all($pattern, $variables['items']['0']['#markup'], $output)) {
         foreach ($output[0] as $embed) {
+          // check that the iframe is from youtube or vimeo
+          if (strpos($embed, 'youtube') == false && strpos($embed, 'vimeo') == false) {
+            continue;
+          }
           $variables['items']['0']['#markup'] = str_replace($embed, '<div class="video-container">' . $embed . '</div>', $variables['items']['0']['#markup']);
         }
         $css = array(
